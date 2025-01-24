@@ -45,7 +45,7 @@ jobs:
         pip install buildozer
         pip install cython
 
-    - name: Set up Android SDK
+    - name: Set up Android SDK and Build Tools
       run: |
         mkdir -p ~/.android
         echo "### User Sources for Android SDK Manager" > ~/.android/repositories.cfg
@@ -57,13 +57,11 @@ jobs:
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "build-tools;30.0.3" "platform-tools" "platforms;android-30"
-
-        # تأكيد وجود أداة aidl
-        export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
-        aidl --version
+        sdkmanager --sdk_root=$ANDROID_HOME "cmdline-tools;latest"
 
     - name: Build APK with Buildozer
       run: |
+        export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
         buildozer -v android debug
 
     - name: Upload APK Artifact
