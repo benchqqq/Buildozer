@@ -65,8 +65,9 @@ jobs:
         mkdir -p ~/.android
         echo "### User Sources for Android SDK Manager" > ~/.android/repositories.cfg
         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O android-sdk-tools.zip
-        unzip android-sdk-tools.zip -d ~/.android
+        unzip android-sdk-tools.zip -d ~/.android/cmdline-tools
         rm android-sdk-tools.zip
+        mv ~/.android/cmdline-tools/cmdline-tools ~/.android/cmdline-tools/tools
         export ANDROID_HOME=~/.android
         export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
