@@ -47,11 +47,19 @@ jobs:
         sdkmanager --sdk_root=$ANDROID_HOME "build-tools;30.0.3" "platform-tools" "platforms;android-30"
         sdkmanager --sdk_root=$ANDROID_HOME "ndk;23.1.7779620"
 
+    - name: Verify NDK installation
+      run: |
+        export ANDROID_HOME=~/.android
+        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/23.1.7779620
+        export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        clang --version
+
     - name: Build APK with python-for-android
       run: |
         export ANDROIDSDK=$ANDROID_HOME
         export ANDROIDNDK=$ANDROID_HOME/ndk/23.1.7779620
         export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
+        export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
         p4a apk --private . --package=org.test.myapp --name=MyApp --version=1.0 --requirements=kivy --arch=armeabi-v7a
 
     - name: Upload APK Artifact
