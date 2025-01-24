@@ -1,45 +1,62 @@
 name: Build Android APK with python-for-android
 
-   on:
-     push:
-       branches:
-         - main
-     pull_request:
-       branches:
-         - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-   jobs:
-     build:
-       runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-       steps:
-       - name: Checkout code
-         uses: actions/checkout@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-       - name: Set up Python
-         uses: actions/setup-python@v5
-         with:
-           python-version: "3.9"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.9"
 
-       - name: Install system dependencies
-         run: |
-           sudo apt-get update
-           sudo apt-get install -y python3-pip python3-setuptools python3-virtualenv
-           sudo apt-get install -y openjdk-11-jdk
-           sudo apt-get install -y wget unzip
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip python3-setuptools python3-virtualenv
+        sudo apt-get install -y openjdk-11-jdk
+        sudo apt-get install -y wget unzip
 
-       - name: Install python-for-android
-         run: |
-           pip install --upgrade pip
-           pip install python-for-android
+    - name: Install python-for-android
+      run: |
+        pip install --upgrade pip
+        pip install python-for-android
 
-       - name: Build APK
-         run: |
-           p4a apk --private . --package=org.test.myapp --name=MyApp --version=1.0 --requirements=kivy --arch=armeabi-v7a
+    - name: Set up Android SDK and NDK
+      run: |
+        mkdir -p ~/.android
+        echo "### User Sources for Android SDK Manager" > ~/.android/repositories.cfg
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O android-sdk-tools.zip
+        unzip android-sdk-tools.zip -d ~/.android/cmdline-tools
+        rm android-sdk-tools.zip
+        mv ~/.android/cmdline-tools/cmdline-tools ~/.android/cmdline-tools/tools
+        export ANDROID_HOME=~/.android
+        export PATH=$ANDROID_HOME/cmdline-tools/tools/bin:$PATH
+        yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
+        sdkmanager --sdk_root=$ANDROID_HOME "build-tools;30.0.3" "platform-tools" "platforms;android-30"
+        sdkmanager --sdk_root=$ANDROID_HOME "ndk;23.1.7779620"
 
-       - name: Upload APK Artifact
-         uses: actions/upload-artifact@v4
-         with:
-           name: android-apk
-           path: bin/*.apk
-           if-no-files-found: error
+    - name: Build APK with python-for-android
+      run: |
+        export ANDROIDSDK=$ANDROID_HOME
+        export ANDROIDNDK=$ANDROID_HOME/ndk/23.1.7779620
+        export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
+        p4a apk --private . --package=org.test.myapp --name=MyApp --version=1.0 --requirements=kivy --arch=armeabi-v7a
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: bin/*.apk
+        if-no-files-found: error
