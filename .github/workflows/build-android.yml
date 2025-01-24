@@ -58,6 +58,10 @@ jobs:
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "build-tools;30.0.3" "platform-tools" "platforms;android-30"
 
+        # تأكيد وجود أداة aidl
+        export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
+        aidl --version
+
     - name: Build APK with Buildozer
       run: |
         buildozer -v android debug
