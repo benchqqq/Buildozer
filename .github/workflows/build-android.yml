@@ -64,7 +64,6 @@ jobs:
         export ANDROIDSDK=$ANDROID_HOME
         export ANDROIDNDK=$ANDROID_HOME/ndk
         export PATH=$ANDROID_HOME/build-tools/30.0.3:$PATH
-        buildozer init
 
     - name: Build APK with Buildozer
       run: |
