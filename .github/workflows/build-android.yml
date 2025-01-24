@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -18,43 +21,25 @@ jobs:
       with:
         python-version: "3.9"
 
-    - name: Cache Android SDK and NDK
+    - name: Cache Android SDK and Gradle
       id: cache-android
       uses: actions/cache@v4
       with:
         path: |
-          ~/.buildozer
           ~/.android
           ~/.gradle
-        key: android-deps-${{ runner.os }}
+        key: android-deps-${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+        restore-keys: |
+          android-deps-${{ runner.os }}-
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-pip python3-setuptools python3-virtualenv
-        sudo apt-get install -y libssl-dev libffi-dev build-essential
-        sudo apt-get install -y openjdk-8-jdk
-        sudo apt-get install -y zlib1g-dev
-        sudo apt-get install -y ccache
-        sudo apt-get install -y libncurses5-dev
-        sudo apt-get install -y libncursesw5-dev
-        sudo apt-get install -y libltdl-dev
-        sudo apt-get install -y libsqlite3-dev
-        sudo apt-get install -y libgdbm-dev
-        sudo apt-get install -y libbz2-dev
-        sudo apt-get install -y libreadline-dev
-        sudo apt-get install -y tk-dev
-        sudo apt-get install -y libssl-dev
-        sudo apt-get install -y libffi-dev
-        sudo apt-get install -y libxml2-dev
-        sudo apt-get install -y libxslt1-dev
-        sudo apt-get install -y libpq-dev
-        sudo apt-get install -y wget
-        sudo apt-get install -y unzip
-        sudo apt-get install -y curl
-        sudo apt-get install -y git
+        sudo apt-get install -y openjdk-11-jdk
+        sudo apt-get install -y wget unzip
 
-    - name: Install Buildozer
+    - name: Install Buildozer and dependencies
       run: |
         pip install --upgrade pip
         pip install buildozer
@@ -73,7 +58,7 @@ jobs:
         yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
         sdkmanager --sdk_root=$ANDROID_HOME "build-tools;30.0.3" "platform-tools" "platforms;android-30"
 
-    - name: Build APK
+    - name: Build APK with Buildozer
       run: |
         buildozer -v android debug
 
