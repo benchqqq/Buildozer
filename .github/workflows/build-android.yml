@@ -18,6 +18,16 @@ jobs:
       with:
         python-version: "3.9"
 
+    - name: Cache Android SDK and NDK
+      id: cache-android
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.buildozer
+          ~/.android
+          ~/.gradle
+        key: android-deps-${{ runner.os }}
+
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -49,10 +59,6 @@ jobs:
         pip install --upgrade pip
         pip install buildozer
         pip install cython
-
-    - name: Initialize Buildozer
-      run: |
-        buildozer init
 
     - name: Build APK
       run: |
